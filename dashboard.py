@@ -76,6 +76,38 @@ mental_vs_fisica = filtered_data['Mental_vs_fisica'].value_counts()
 fig = px.pie(mental_vs_fisica, values=mental_vs_fisica.values, names=mental_vs_fisica.index, title="Saúde Mental vs. Saúde Física", color_discrete_sequence=colors)
 st.plotly_chart(fig, use_container_width=True)
 
+# Gráfico 7: Fala sobre Saúde Mental com Colegas e Supervisores por Idade
+st.subheader("Fala sobre Saúde Mental com Colegas e Supervisores por Idade")
+
+# Criar faixas etárias
+filtered_data['Faixa_Etaria'] = pd.cut(filtered_data['Idade'], bins=range(20, 70, 10), right=False)
+
+# Agrupar dados por faixa etária e contar as respostas para 'Colegas_de_trabalho' e 'Supervisor'
+fala_saude_mental = filtered_data.groupby('Faixa_Etaria')[['Colegas_de_trabalho', 'Supervisor']].value_counts().unstack().fillna(0)
+
+# Criar o gráfico de barras agrupadas
+fig = go.Figure()
+
+for col in fala_saude_mental.columns:
+    fig.add_trace(go.Bar(
+        x=fala_saude_mental.index.astype(str),
+        y=fala_saude_mental[col],
+        name=col
+    ))
+
+# Atualizar layout do gráfico
+fig.update_layout(
+    barmode='group',
+    title="Fala sobre Saúde Mental com Colegas e Supervisores por Idade",
+    xaxis_title="Faixa Etária",
+    yaxis_title="Quantidade de Pessoas",
+    legend_title="Fala com",
+    colorway=colors
+)
+
+# Exibir o gráfico
+st.plotly_chart(fig, use_container_width=True)
+
 # Estatísticas Descritivas
 st.subheader("Estatísticas Descritivas")
 st.write(filtered_data[['Idade', 'Genero', 'Pais', 'Tratamento', 'Historico_familiar', 'Interfere_no_trabalho']].describe())
