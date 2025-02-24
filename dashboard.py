@@ -83,17 +83,27 @@ st.subheader("Fala sobre Saúde Mental com Colegas e Supervisores por Idade")
 filtered_data['Faixa_Etaria'] = pd.cut(filtered_data['Idade'], bins=range(20, 70, 10), right=False)
 
 # Agrupar dados por faixa etária e contar as respostas para 'Colegas_de_trabalho' e 'Supervisor'
-fala_saude_mental = filtered_data.groupby('Faixa_Etaria')[['Colegas_de_trabalho', 'Supervisor']].value_counts().unstack().fillna(0)
+fala_saude_mental = filtered_data.groupby(['Faixa_Etaria', 'Colegas_de_trabalho', 'Supervisor']).size().unstack().fillna(0)
+
+# Resetar o índice para facilitar a manipulação
+fala_saude_mental = fala_saude_mental.reset_index()
 
 # Criar o gráfico de barras agrupadas
 fig = go.Figure()
 
-for col in fala_saude_mental.columns:
-    fig.add_trace(go.Bar(
-        x=fala_saude_mental.index.astype(str),
-        y=fala_saude_mental[col],
-        name=col
-    ))
+# Adicionar barras para 'Colegas_de_trabalho'
+fig.add_trace(go.Bar(
+    x=fala_saude_mental['Faixa_Etaria'].astype(str),
+    y=fala_saude_mental['Sim'],  # Supondo que 'Sim' seja o valor para "Fala com Colegas"
+    name='Fala com Colegas'
+))
+
+# Adicionar barras para 'Supervisor'
+fig.add_trace(go.Bar(
+    x=fala_saude_mental['Faixa_Etaria'].astype(str),
+    y=fala_saude_mental['Sim'],  # Supondo que 'Sim' seja o valor para "Fala com Supervisor"
+    name='Fala com Supervisor'
+))
 
 # Atualizar layout do gráfico
 fig.update_layout(
