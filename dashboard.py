@@ -76,41 +76,43 @@ mental_vs_fisica = filtered_data['Mental_vs_fisica'].value_counts()
 fig = px.pie(mental_vs_fisica, values=mental_vs_fisica.values, names=mental_vs_fisica.index, title="Saúde Mental vs. Saúde Física", color_discrete_sequence=colors)
 st.plotly_chart(fig, use_container_width=True)
 
-# Gráfico 7: Fala sobre Saúde Mental com Colegas e Supervisores por Idade
-st.subheader("Fala sobre Saúde Mental com Colegas e Supervisores por Idade")
+# Gráfico 7: Proporção de Pessoas que Falam sobre Saúde Mental com Colegas e Supervisores
+st.subheader("Proporção de Pessoas que Falam sobre Saúde Mental com Colegas e Supervisores")
 
-# Criar faixas etárias
-filtered_data['Faixa_Etaria'] = pd.cut(filtered_data['Idade'], bins=range(20, 70, 10), right=False)
-
-# Agrupar dados por faixa etária e contar as respostas para 'Colegas_de_trabalho' e 'Supervisor'
-fala_saude_mental = filtered_data.groupby(['Faixa_Etaria', 'Colegas_de_trabalho', 'Supervisor']).size().unstack().fillna(0)
+# Calcular a proporção de pessoas que falam com colegas e supervisores
+fala_saude_mental = filtered_data[['Colegas_de_trabalho', 'Supervisor']].apply(lambda x: x.value_counts(normalize=True) * 100)
 
 # Resetar o índice para facilitar a manipulação
 fala_saude_mental = fala_saude_mental.reset_index()
+
+# Renomear colunas para facilitar a visualização
+fala_saude_mental.columns = ['Resposta', 'Colegas_de_trabalho', 'Supervisor']
 
 # Criar o gráfico de barras agrupadas
 fig = go.Figure()
 
 # Adicionar barras para 'Colegas_de_trabalho'
 fig.add_trace(go.Bar(
-    x=fala_saude_mental['Faixa_Etaria'].astype(str),
-    y=fala_saude_mental['Sim'],  # Supondo que 'Sim' seja o valor para "Fala com Colegas"
-    name='Fala com Colegas'
+    x=fala_saude_mental['Resposta'],
+    y=fala_saude_mental['Colegas_de_trabalho'],
+    name='Fala com Colegas',
+    marker_color=colors[0]
 ))
 
 # Adicionar barras para 'Supervisor'
 fig.add_trace(go.Bar(
-    x=fala_saude_mental['Faixa_Etaria'].astype(str),
-    y=fala_saude_mental['Sim'],  # Supondo que 'Sim' seja o valor para "Fala com Supervisor"
-    name='Fala com Supervisor'
+    x=fala_saude_mental['Resposta'],
+    y=fala_saude_mental['Supervisor'],
+    name='Fala com Supervisor',
+    marker_color=colors[1]
 ))
 
 # Atualizar layout do gráfico
 fig.update_layout(
     barmode='group',
-    title="Fala sobre Saúde Mental com Colegas e Supervisores por Idade",
-    xaxis_title="Faixa Etária",
-    yaxis_title="Quantidade de Pessoas",
+    title="Proporção de Pessoas que Falam sobre Saúde Mental com Colegas e Supervisores",
+    xaxis_title="Resposta",
+    yaxis_title="Proporção (%)",
     legend_title="Fala com",
     colorway=colors
 )
